@@ -1,8 +1,12 @@
+//ajustes para el tamano de la pantalla
 let anchoScreen = screen.availWidth * 0.98;
 let altoScreen = screen.availHeight * 0.8;
+
+//botones en la pantalla para moviles
 let btnLeft = document.getElementById('btnLeft');
 let btnRight = document.getElementById('btnRight');
 
+//configuracion del escenario
 const config = {
   type: Phaser.AUTO,
   width: anchoScreen,
@@ -21,12 +25,15 @@ const config = {
   }
 };
 
+//creamos la instancia del juego
 const game = new Phaser.Game(config);
+
+//variables del juego
 let nave, cursors, enemigos, balas, vidasText, nroDestruccionesText;
 let vidas = 3;
 let nroDestrucciones = 0;
-let ultimaBala = 0; // Para controlar la cadencia de disparo
 
+//metodo para precargar recursos
 function preload() {
   this.load.image('fondo', '../img/fondo.jpg');
   this.load.image('nave', '../img/naveSF.png');
@@ -34,6 +41,7 @@ function preload() {
   this.load.image('bala', '../img/balaSF.png'); // Cargar imagen de la bala
 }
 
+//metodo creador de objetos y configuraciones adicionales necesarias
 function create() {
   //cargar la imagen de fondo
   this.add.image(400, 300, 'fondo');
@@ -67,17 +75,19 @@ function create() {
 
   // Disparar al hacer clic en pantalla
   this.input.on('pointerdown', dispararBala);
-  // cursors = this.input.keyboard.createCursorKeys();
-  // this.input.keyboard.on('keydown-SPACE', dispararBala, this);
+
 }
 
-function update(time) {
+//metodo que actualiza ante eventos
+function update() {
+  //mover la nave con los botones en pantalla
   btnLeft.addEventListener('click', () => {
     nave.setVelocityX(-300);
   });
   btnRight.addEventListener('click', () => {
     nave.setVelocityX(300);
   })
+
   // Movimiento de la nave
   nave.setVelocity(0);
   if (cursors.left.isDown) {
@@ -86,15 +96,12 @@ function update(time) {
     nave.setVelocityX(300);
   }
 
-  // // Destruir balas que salen de la pantalla
-  // balas.children.iterate(function (bala) {
-  //   if (bala.y < 0) {
-  //     bala.destroy();
-  //   }
-  // });
 }
 
-function dispararBala(pointer, time) {
+/**
+ * Metodos como collbacks ante eventos
+ */
+function dispararBala() {
   console.log('bala disparada');
   
     var bala = balas.create(nave.x, nave.y - 20, 'bala'); // Crear la bala en la posición de la nave
@@ -127,7 +134,7 @@ function perderVida() {
   vidasText.setText('Vidas: ' + vidas);
 
   if (vidas === 0) {
-    this.add.text(100, 100, 'Game Over!', { fontSize: '40px', fill: 'orange' });
+    document.getElementById('gameOver').style.display = 'block';
     this.physics.pause();
   }
 }
