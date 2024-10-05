@@ -35,7 +35,7 @@ let nroDestrucciones = 0;
 
 //metodo para precargar recursos
 function preload() {
-  this.load.image('fondo', 'https://github.com/AvilaPro/naveEspacial/blob/master/img/fondo.jpg');
+  this.load.image('fondo', 'https://raw.githubusercontent.com/AvilaPro/naveEspacial/refs/heads/master/img/fondo.jpg');
   this.load.image('nave', '../img/naveSF.png');
   this.load.image('enemigo', '../img/enemigoSF.png');
   this.load.image('bala', '../img/balaSF.png'); // Cargar imagen de la bala
