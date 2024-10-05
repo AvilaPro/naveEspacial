@@ -3,7 +3,6 @@ let altoScreen = screen.availHeight * 0.8;
 let btnLeft = document.getElementById('btnLeft');
 let btnRight = document.getElementById('btnRight');
 
-
 const config = {
   type: Phaser.AUTO,
   width: anchoScreen,
@@ -23,15 +22,16 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-let nave, cursors, poderes, enemigos, vidasText, nroDestruccionesText, poderActivo = false;
+let nave, cursors, enemigos, balas, vidasText, nroDestruccionesText;
 let vidas = 3;
 let nroDestrucciones = 0;
+let ultimaBala = 0; // Para controlar la cadencia de disparo
 
 function preload() {
   this.load.image('fondo', '../img/fondo.jpg');
   this.load.image('nave', '../img/naveSF.png');
-  this.load.image('poder', '../img/poderSF.png');
   this.load.image('enemigo', '../img/enemigoSF.png');
+  this.load.image('bala', '../img/balaSF.png'); // Cargar imagen de la bala
 }
 
 function create() {
@@ -41,32 +41,37 @@ function create() {
   // Crear la nave
   nave = this.physics.add.sprite(400, 550, 'nave').setCollideWorldBounds(true);
 
-  // Crear grupos para poderes y enemigos
-  poderes = this.physics.add.group();
+  // Crear grupos para enemigos y balas
   enemigos = this.physics.add.group();
+  balas = this.physics.add.group();
 
   // Teclado
   cursors = this.input.keyboard.createCursorKeys();
 
   // Añadir colisiones
-  this.physics.add.overlap(nave, poderes, recogerPoder, null, this);
   this.physics.add.overlap(nave, enemigos, chocarEnemigo, null, this);
+  this.physics.add.overlap(balas, enemigos, destruirEnemigoConBala, null, this);
 
   // Texto de vidas
   vidasText = this.add.text(10, 10, 'Vidas: 3', { fontSize: '20px', fill: '#fff' });
 
   nroDestruccionesText = this.add.text(10, 30, 'Destrucciones: 0', { fontSize: '20px', fill: 'yellow' });
 
-  // Generar objetos cada cierto tiempo
+  // Generar enemigos cada cierto tiempo
   this.time.addEvent({
     delay: 1000,
-    callback: generarObjetos,
+    callback: generarEnemigos,
     callbackScope: this,
     loop: true
   });
+
+  // Disparar al hacer clic en pantalla
+  this.input.on('pointerdown', dispararBala);
+  // cursors = this.input.keyboard.createCursorKeys();
+  // this.input.keyboard.on('keydown-SPACE', dispararBala, this);
 }
 
-function update() {
+function update(time) {
   btnLeft.addEventListener('click', () => {
     nave.setVelocityX(-300);
   });
@@ -81,49 +86,37 @@ function update() {
     nave.setVelocityX(300);
   }
 
-  // Si hay poder activo, se puede destruir enemigos
-  if (poderActivo) {
-    this.physics.world.overlap(nave, enemigos, destruirEnemigo, null, this);
-  }
+  // // Destruir balas que salen de la pantalla
+  // balas.children.iterate(function (bala) {
+  //   if (bala.y < 0) {
+  //     bala.destroy();
+  //   }
+  // });
 }
 
-function generarObjetos() {
+function dispararBala(pointer, time) {
+  console.log('bala disparada');
+  
+    var bala = balas.create(nave.x, nave.y - 20, 'bala'); // Crear la bala en la posición de la nave
+    bala.setVelocityY(-400); // Velocidad de la bala hacia arriba
+    // ultimaBala = time; // Actualizar el tiempo de la última bala disparada
+  
+}
+
+function generarEnemigos() {
   const x = Phaser.Math.Between(50, 750);
-  const objetoEsPoder = Phaser.Math.Between(0, 1);
-
-  if (objetoEsPoder) {
-    // Crear un poder
-    const poder = poderes.create(x, 0, 'poder');
-    poder.setVelocityY(200);
-  } else {
-    // Crear un enemigo
-    const enemigo = enemigos.create(x, 0, 'enemigo');
-    enemigo.setVelocityY(150);
-  }
-}
-
-function recogerPoder(nave, poder) {
-  poder.destroy();
-  poderActivo = true;
-
-  // Duración del poder
-  this.time.addEvent({
-    delay: 5000,
-    callback: () => {
-      poderActivo = false;
-    },
-    callbackScope: this
-  });
+  // Crear un enemigo
+  const enemigo = enemigos.create(x, 0, 'enemigo');
+  enemigo.setVelocityY(150);
 }
 
 function chocarEnemigo(nave, enemigo) {
-  if (!poderActivo) {
-    enemigo.destroy();
-    perderVida();
-  }
+  enemigo.destroy();
+  perderVida();
 }
 
-function destruirEnemigo(nave, enemigo) {
+function destruirEnemigoConBala(bala, enemigo) {
+  bala.destroy();
   enemigo.destroy();
   nroDestrucciones += 1;
   nroDestruccionesText.setText('Destrucciones: ' + nroDestrucciones);
@@ -134,7 +127,6 @@ function perderVida() {
   vidasText.setText('Vidas: ' + vidas);
 
   if (vidas === 0) {
-    // vidasText.setText('¡Juego Terminado!');
     this.add.text(100, 100, 'Game Over!', { fontSize: '40px', fill: 'orange' });
     this.physics.pause();
   }
