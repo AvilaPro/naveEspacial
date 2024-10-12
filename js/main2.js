@@ -76,6 +76,11 @@ function create() {
   // Disparar al hacer clic en pantalla
   this.input.on('pointerdown', dispararBala);
 
+  // Crear un objeto que almacene las coordenadas del puntero
+  // if (anchoScreen < 500) {
+  //   this.pointer = this.input.activePointer;
+  // }
+
 }
 
 //metodo que actualiza ante eventos
@@ -87,6 +92,11 @@ function update() {
   btnRight.addEventListener('click', () => {
     nave.setVelocityX(300);
   })
+
+  // Actualizar la posición del jugador en cada frame
+  // if (anchoScreen < 500) {
+  //   nave.x = this.pointer.x;
+  // }
 
   // Movimiento de la nave
   nave.setVelocity(0);
